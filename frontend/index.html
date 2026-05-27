@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Document Assistant</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- SIDEBAR: Ingestion & Documents -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-brain-circuit glow-icon"></i>
+                    <span>Antigravity</span>
+                </div>
+                <p class="tagline">Multi-Agent Assistant</p>
+            </div>
+            
+            <!-- Ingestion Section -->
+            <div class="sidebar-section">
+                <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Documents</h3>
+                <div class="upload-dropzone" id="dropzone">
+                    <input type="file" id="file-input" multiple accept=".pdf,.docx,.txt" style="display: none;">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <p>Drag & Drop or <span class="browse-link">Browse</span></p>
+                    <span class="file-limits">PDF, DOCX, TXT (Max 15MB)</span>
+                </div>
+            </div>
+            
+            <!-- Document List Section -->
+            <div class="sidebar-section docs-section">
+                <div class="section-title-row">
+                    <h3><i class="fa-solid fa-folder-open"></i> Document Library</h3>
+                    <button class="btn-refresh" id="btn-refresh-docs" title="Refresh library">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
+                <div class="document-list" id="document-list">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-box-open"></i>
+                        <p>No documents uploaded yet</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conversation History List -->
+            <div class="sidebar-section conv-section">
+                <h3><i class="fa-solid fa-comments"></i> Conversations</h3>
+                <div class="conversation-list" id="conversation-list">
+                    <div class="empty-state">
+                        <p>No chat history</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <h1 id="active-chat-title">New Discussion</h1>
+                    <span class="chat-status" id="chat-status"><i class="fa-solid fa-circle-check"></i> System Idle</span>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-secondary" id="btn-new-chat">
+                        <i class="fa-solid fa-plus"></i> New Chat
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Workspace: Chat + Real-Time Workflow Tracer -->
+            <div class="workspace">
+                <!-- Chat Interface -->
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Welcome message -->
+                        <div class="message assistant-msg welcome-msg">
+                            <div class="msg-avatar">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="msg-bubble">
+                                <h2>Hello! I'm your Intelligent Multi-Agent Assistant.</h2>
+                                <p>I am backed by a pipeline of 5 specialized agents that work collaboratively to find precise answers grounded in your documents:</p>
+                                <ul class="welcome-agent-list">
+                                    <li><strong><i class="fa-solid fa-compass"></i> Planner Agent</strong>: Strategizes the optimal retrieval queries.</li>
+                                    <li><strong><i class="fa-solid fa-magnifying-glass"></i> Retrieval Agent</strong>: Conducts hybrid vector & keyword searches.</li>
+                                    <li><strong><i class="fa-solid fa-feather-pointed"></i> Summarizer Agent</strong>: Formulates citation-grounded answers.</li>
+                                    <li><strong><i class="fa-solid fa-shield-halved"></i> Verification Agent</strong>: Screens responses to prevent hallucinations.</li>
+                                    <li><strong><i class="fa-solid fa-database"></i> Memory Agent</strong>: Syncs long-term key insights and context.</li>
+                                </ul>
+                                <p>To start, upload some documents in the sidebar and ask me anything!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Input -->
+                    <div class="chat-input-area">
+                        <form id="chat-form">
+                            <input type="text" id="query-input" placeholder="Ask a question about your uploaded documents..." autocomplete="off" required>
+                            <button type="submit" class="btn btn-primary" id="btn-send">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- AGENT WORKFLOW MONITOR (Live visualization of LangGraph state execution) -->
+                <aside class="workflow-monitor">
+                    <div class="monitor-header">
+                        <h3><i class="fa-solid fa-network-wired"></i> Agentic Workflow Trace</h3>
+                        <span class="active-badge" id="monitor-badge">Inactive</span>
+                    </div>
+                    <div class="monitor-body">
+                        <!-- Graph flowchart visualizer representation -->
+                        <div class="agent-graph-visual">
+                            <div class="visual-node active-node" id="node-planner">
+                                <i class="fa-solid fa-compass"></i>
+                                <span>Planner</span>
+                            </div>
+                            <div class="visual-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                            <div class="visual-node" id="node-retrieval">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <span>Retrieval</span>
+                            </div>
+                            <div class="visual-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                            <div class="visual-node" id="node-summarizer">
+                                <i class="fa-solid fa-feather-pointed"></i>
+                                <span>Summarizer</span>
+                            </div>
+                            <div class="visual-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                            <div class="visual-node" id="node-verification">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Verification</span>
+                            </div>
+                            <div class="visual-arrow feedback-arrow" id="arrow-feedback"><i class="fa-solid fa-rotate-left"></i> Loop</div>
+                            <div class="visual-node" id="node-memory">
+                                <i class="fa-solid fa-database"></i>
+                                <span>Memory</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Timeline trace logger -->
+                        <div class="workflow-logs" id="workflow-logs">
+                            <div class="log-empty-state">
+                                <i class="fa-solid fa-terminal"></i>
+                                <p>Submit a question to see real-time agent cooperation and verification loop steps.</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+        
+    </div>
+    
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>

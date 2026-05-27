@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: doc_assistant_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: document_assistant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d document_assistant"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: doc_assistant_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: doc_assistant_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/document_assistant
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-your_openai_api_key_here}
+      - UPLOAD_DIR=/app/uploads
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_volume:/app/uploads
+      - chroma_volume:/app/chroma_db
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: doc_assistant_worker
+    restart: always
+    command: arq app.worker.WorkerSettings
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/document_assistant
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-your_openai_api_key_here}
+      - UPLOAD_DIR=/app/uploads
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+    volumes:
+      - uploads_volume:/app/uploads
+      - chroma_volume:/app/chroma_db
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  uploads_volume:
+  chroma_volume:
