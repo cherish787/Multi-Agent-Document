@@ -1,4 +1,4 @@
-# Base build stages
+# Base build stage
 FROM python:3.10-slim as builder
 
 WORKDIR /build
