@@ -2,7 +2,7 @@
 
 A high-performance, asynchronous Document Assistant that uses a **LangGraph-driven multi-agent system** to answer user queries with absolute correctness. By combining dense and sparse search indices (**Hybrid RAG**) with a self-correcting **verification loop**, this assistant prevents hallucinations and ensures every claim is backed by precise, valid citations from your uploaded files (PDF, DOCX, and TXT).
 
-The frontend is a lightweight, dark-themed Glassmorphic dashboard built in vanilla HTML/CSS/JS that displays the conversation alongside real-time updates and active states of the multi-agent graph as it processes requests.
+The frontend is a lightweight, dark-themed Glassmorphic dashboard built in vanilla HTML/CSS/JS that displays the conversation alongside real-time updates and active states of the multi-agent graph as it processes requests
 
 ---
 
