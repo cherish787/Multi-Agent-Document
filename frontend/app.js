@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MULTI-AGENT DOCUMENT ASSISTANT - FRONTEND LOGIC.
+   MULTI-AGENT DOCUMENT ASSISTANT - FRONTEND LOGIC
    ========================================================================== */
 
 const API_BASE = "http://localhost:8000";
