@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 import os
 import sys
 
-# Setup Path.
+# Setup Path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.services.document import DocumentProcessor
